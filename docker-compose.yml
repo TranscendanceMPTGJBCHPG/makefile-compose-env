@@ -1,0 +1,40 @@
+services:
+  server:
+    build:
+      context: .
+      dockerfile: websockets/Dockerfile.server
+    ports:
+      - "8000:8000"
+    networks:
+        - transcendence
+#    depends_on:
+#      - ai_client
+
+  ai_client:
+    build:
+      context: .
+      dockerfile: PongAI/Dockerfile.ai
+    ports:
+      - "8001:8001"
+    depends_on:
+      - server
+    networks:
+        - transcendence
+
+  frontend_client:
+    build:
+      context: .
+      dockerfile: ThreeJS_TEST/Dockerfile.frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - server
+    networks:
+        - transcendence
+    environment:
+      VITE_BACKEND_URL: "http://localhost:8000"
+      VITE_WS_URL: "ws://localhost:8001"
+
+networks:
+  transcendence:
+    driver: bridge
