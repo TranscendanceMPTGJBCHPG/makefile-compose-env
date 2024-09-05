@@ -7,8 +7,6 @@ services:
       - "8000:8000"
     networks:
         - transcendence
-#    depends_on:
-#      - ai_client
 
   ai_client:
     build:
@@ -32,8 +30,8 @@ services:
     networks:
         - transcendence
     environment:
-      VITE_BACKEND_URL: "http://localhost:8000"
-      VITE_WS_URL: "ws://localhost:8001"
+      VITE_BACKEND_URL: "http://server:8000"
+      VITE_WS_URL: "ws://server:8001"
 
 networks:
   transcendence:
