@@ -3,17 +3,15 @@ services:
     build:
       context: .
       dockerfile: websockets/Dockerfile.server
-    ports:
-      - "8000:8000"
     networks:
         - transcendence
+    environment:
+      AI_WS_URL: "ws://server:8000"  # WebSocket via le nom du service 'server'
 
   ai_client:
     build:
       context: .
       dockerfile: PongAI/Dockerfile.ai
-    ports:
-      - "8001:8001"
     depends_on:
       - server
     networks:
@@ -31,7 +29,7 @@ services:
         - transcendence
     environment:
       VITE_BACKEND_URL: "http://server:8000"
-      VITE_WS_URL: "ws://server:8001"
+      VITE_WS_URL: "ws://server:8000"
 
 networks:
   transcendence:
