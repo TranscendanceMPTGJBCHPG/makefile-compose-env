@@ -1,10 +1,25 @@
 services:
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "81:81"  # Expose Nginx à l'hôte sur le port 81
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf  # Monte ton fichier nginx.conf
+    depends_on:
+      - server
+      - frontend_client
+    networks:
+      - transcendence
+
   server:
     build:
       context: .
       dockerfile: websockets/Dockerfile.server
     networks:
         - transcendence
+    ports:
+        - "8000:8000"
     environment:
       AI_WS_URL: "ws://server:8000"  # WebSocket via le nom du service 'server'
 
@@ -28,8 +43,8 @@ services:
     networks:
         - transcendence
     environment:
-      VITE_BACKEND_URL: "http://server:8000"
-      VITE_WS_URL: "ws://server:8000"
+      VITE_BACKEND_URL: "http://nginx:81"
+      VITE_WS_URL: "ws://nginx:81"
 
 networks:
   transcendence:
