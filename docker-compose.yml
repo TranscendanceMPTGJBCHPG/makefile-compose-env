@@ -3,7 +3,7 @@ services:
   nginx:
     image: nginx:latest
     ports:
-      - "81:81"  # Expose Nginx à l'hôte sur le port 81
+      - "7777:7777"  # Expose Nginx à l'hôte sur le port 7777
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf  # Monte ton fichier nginx.conf
     depends_on:
