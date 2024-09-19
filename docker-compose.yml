@@ -28,14 +28,16 @@ services:
       context: .
       dockerfile: PongAI/Dockerfile.ai
     depends_on:
+      - nginx
       - server
+      - frontend_client
     networks:
         - transcendence
 
   frontend_client:
     build:
       context: .
-      dockerfile: ThreeJS_TEST/Dockerfile.frontend
+      dockerfile: AstroPong/Dockerfile.frontend
     ports:
       - "5173:5173"
     depends_on:
