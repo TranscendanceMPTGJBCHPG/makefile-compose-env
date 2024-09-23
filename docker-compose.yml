@@ -33,6 +33,8 @@ services:
       - frontend_client
     networks:
         - transcendence
+    volumes:
+        - ./PongAI/ai_data:/app/ai_data  # Nouveau volume pour sauvegarder les données AI
 
   frontend_client:
     build:
