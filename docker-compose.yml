@@ -15,7 +15,7 @@ services:
   server:
     build:
       context: .
-      dockerfile: websockets/Dockerfile.server
+      dockerfile: GameServer/Dockerfile.server
     networks:
         - transcendence
     ports:
