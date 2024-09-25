@@ -21,7 +21,14 @@ services:
     ports:
         - "8000:8000"
     environment:
-      AI_WS_URL: "ws://server:8000"  # WebSocket via le nom du service 'server'
+      AI_WS_URL: "ws://server:8000"
+      DISPLAY: ${DISPLAY} # Utilise la variable d'environnement DISPLAY de l'hôte
+      SDL_AUDIODRIVER: "dummy" # Désactive le son pour éviter les erreurs de son
+      XDG_RUNTIME_DIR: "/tmp/runtime-docker" # Utilise un répertoire temporaire pour les fichiers X11
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix # Monte le socket X11 de l'hôte
+    stdin_open: true # Maintenir STDIN ouvert pour interaction (optionnel)
+    tty: true # Assurer un terminal interactif
 
   ai_client:
     build:
