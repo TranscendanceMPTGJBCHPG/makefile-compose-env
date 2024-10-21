@@ -40,7 +40,7 @@ services:
       context: .
       dockerfile: matchmaking/Dockerfile.matchmaking
     environment:
-      DJANGO_ALLOWED_HOSTS: "localhost 127.0.0.1 matchmaking nginx"
+      DJANGO_ALLOWED_HOSTS: "localhost 127.0.0.1 matchmaking nginx 192.168.0.0/16 10.0.0.0/8"
     networks:
       - transcendence
     ports:
