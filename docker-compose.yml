@@ -80,15 +80,18 @@ services:
     build:
       context: .
       dockerfile: AstroPong/Dockerfile.frontend
+    environment:
+      - API_URL="http://0.0.0.0:8080"
+      - CLIENT_ID=${CLIENT_ID}
+      - REDIRECT_URI=${REDIRECT_URI}
+      - VITE_BACKEND_URL="http://nginx:81"
+      - VITE_WS_URL="ws://nginx:81"
     ports:
       - "5173:5173"
     depends_on:
       - server
     networks:
         - transcendence
-    environment:
-      VITE_BACKEND_URL: "http://nginx:81"
-      VITE_WS_URL: "ws://nginx:81"
 
 
   postgres:
