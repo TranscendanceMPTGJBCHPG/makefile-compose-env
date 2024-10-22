@@ -76,6 +76,44 @@ services:
       VITE_BACKEND_URL: "http://nginx:81"
       VITE_WS_URL: "ws://nginx:81"
 
+  postgres:
+    container_name: postgres
+    build:
+      context: ./auth-db/postgres
+      dockerfile: Dockerfile
+      args:
+        POSTGRES_DB: ${DB_NAME}
+        POSTGRES_USER: ${DB_USER}
+        POSTGRES_PASSWORD: ${DB_PASSWORD}
+    env_file: .env
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - transcendence
+
+  auth:
+    container_name: auth
+    build:
+      context: ./auth-db/oauth2
+      dockerfile: Dockerfile
+    env_file: .env
+    volumes:
+      - .:/code
+    depends_on:
+      - postgres
+    ports:
+      - "8080:8080"
+    restart: on-failure
+    networks:
+      - transcendence
+
+volumes:
+  pgdata:
+    driver: local
+
 networks:
   transcendence:
     driver: bridge
