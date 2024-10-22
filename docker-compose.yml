@@ -12,6 +12,7 @@ services:
     networks:
       - transcendence
 
+
   server:
     build:
       context: .
@@ -22,18 +23,7 @@ services:
         - "8000:8000"
     environment:
       AI_WS_URL: "ws://server:8000"
-      DISPLAY: ${DISPLAY} # Utilise la variable d'environnement DISPLAY de l'hôte
-      SDL_AUDIODRIVER: "dummy" # Désactive le son pour éviter les erreurs de son
-      XDG_RUNTIME_DIR: "/tmp/runtime-docker" # Utilise un répertoire temporaire pour les fichiers X11
-#      LIBGL_DRI3_DISABLE: "1" # Désactive DRI3 pour éviter les erreurs de rendu
-#      LIBGL_ALWAYS_SOFTWARE: "1" # Utilise le rendu logiciel pour éviter les erreurs de rendu
 
-    volumes:
-      - /tmp/.X11-unix:/tmp/.X11-unix # Monte le socket X11 de l'hôte
-      - /dev/dri:/dev/dri  # Monte les périphériques graphiques pour l'accélération matérielle
-
-    stdin_open: true # Maintenir STDIN ouvert pour interaction (optionnel)
-    tty: true # Assurer un terminal interactif
 
   matchmaking:
     build:
@@ -49,6 +39,7 @@ services:
       - ./matchmaking:/app
     working_dir: /app/matchmaking_service
 
+
   ai_client:
     build:
       context: .
@@ -61,6 +52,29 @@ services:
         - transcendence
     volumes:
         - ./PongAI/ai_data:/app/ai_data  # Nouveau volume pour sauvegarder les données AI
+  
+  cli_client:
+    build: 
+      context: .
+      dockerfile: CLI_client/Dockerfile.CLI_client
+    networks:
+      - transcendence
+    depends_on:
+      - server
+      - nginx
+    environment:
+      AI_WS_URL: "ws://server:8000"
+      DISPLAY: ${DISPLAY} # Utilise la variable d'environnement DISPLAY de l'hôte
+      SDL_AUDIODRIVER: "dummy" # Désactive le son pour éviter les erreurs de son
+      XDG_RUNTIME_DIR: "/tmp/runtime-docker" # Utilise un répertoire temporaire pour les fichiers X11
+#      LIBGL_DRI3_DISABLE: "1" # Désactive DRI3 pour éviter les erreurs de rendu
+#      LIBGL_ALWAYS_SOFTWARE: "1" # Utilise le rendu logiciel pour éviter les erreurs de rendu
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix # Monte le socket X11 de l'hôte
+      - /dev/dri:/dev/dri  # Monte les périphériques graphiques pour l'accélération matérielle
+    stdin_open: true # Maintenir STDIN ouvert pour interaction (optionnel)
+    tty: true # Assurer un terminal interactif
+
 
   frontend_client:
     build:
@@ -75,6 +89,7 @@ services:
     environment:
       VITE_BACKEND_URL: "http://nginx:81"
       VITE_WS_URL: "ws://nginx:81"
+
 
   postgres:
     container_name: postgres
@@ -94,6 +109,7 @@ services:
     networks:
       - transcendence
 
+
   auth:
     container_name: auth
     build:
@@ -109,6 +125,7 @@ services:
     restart: on-failure
     networks:
       - transcendence
+
 
 volumes:
   pgdata:
