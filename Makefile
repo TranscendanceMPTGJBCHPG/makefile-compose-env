@@ -13,6 +13,29 @@ NC := \033[0m # No Color
 # Cibles par défaut
 .DEFAULT_GOAL := help
 
+setup-ssl:
+	@echo "$(YELLOW)Starting SSL setup...$(NC)"
+	@if [ ! -d "ssl" ]; then \
+		echo "$(GREEN)Creating ssl directory...$(NC)"; \
+		mkdir -p ssl; \
+	fi
+	@if [ ! -f ssl/nginx.crt ] || [ ! -f ssl/nginx.key ]; then \
+		echo "$(GREEN)Generating SSL certificates...$(NC)"; \
+		openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+			-keyout ssl/nginx.key \
+			-out ssl/nginx.crt \
+			-subj "/C=FR/ST=AURA/L=Lyon/O=42/OU=Student/CN=localhost"; \
+	fi
+	@echo "$(GREEN)Setting correct permissions for SSL files...$(NC)"
+	@chmod 644 ssl/nginx.crt
+	@chmod 600 ssl/nginx.key
+	@if [ -f ssl/nginx.crt ] && [ -f ssl/nginx.key ]; then \
+		echo "$(GREEN)SSL certificates are ready$(NC)"; \
+	else \
+		echo "$(RED)Warning: SSL certificates were not created properly$(NC)"; \
+		exit 1; \
+	fi
+
 # Aide
 help:
 	@echo "Usage:"
@@ -47,7 +70,7 @@ define run_xhost
 endef
 
 # Construire les conteneurs
-build:
+build: setup-ssl
 ifdef SERVICE
 	@echo "$(GREEN)Construction du service $(SERVICE)...$(NC)"
 	$(DOCKER_COMPOSE) build $(SERVICE)
@@ -57,7 +80,7 @@ else
 endif
 
 # Construire rapidement les conteneurs
-build-fast:
+build-fast: setup-ssl
 ifdef SERVICE
 	@echo "$(GREEN)Construction rapide du service $(SERVICE)...$(NC)"
 	$(DOCKER_BUILDKIT) $(COMPOSE_DOCKER_CLI_BUILD) $(DOCKER_COMPOSE) build $(SERVICE)
@@ -135,7 +158,7 @@ nginx-reload:
 	$(DOCKER_COMPOSE) exec nginx nginx -s reload
 
 # Reconstruire et redémarrer les conteneurs en arrière-plan
-rebuild:
+rebuild: setup-ssl
 	$(call run_xhost)
 ifdef SERVICE
 	@echo "$(YELLOW)Reconstruction et redémarrage du service $(SERVICE) en arrière-plan...$(NC)"
@@ -146,7 +169,7 @@ else
 endif
 
 # Reconstruire rapidement et redémarrer les conteneurs en arrière-plan
-rebuild-fast:
+rebuild-fast: setup-ssl
 	$(call run_xhost)
 ifdef SERVICE
 	@echo "$(YELLOW)Reconstruction rapide et redémarrage du service $(SERVICE) en arrière-plan...$(NC)"
@@ -157,7 +180,7 @@ else
 endif
 
 # Reconstruire et redémarrer les conteneurs en avant-plan
-rebuild-fg:
+rebuild-fg: setup-ssl
 	$(call run_xhost)
 ifdef SERVICE
 	@echo "$(YELLOW)Reconstruction et redémarrage du service $(SERVICE) en avant-plan...$(NC)"
