@@ -4,6 +4,8 @@ DOCKER_COMPOSE := docker compose -f $(COMPOSE_FILE)
 DOCKER_BUILDKIT := DOCKER_BUILDKIT=1
 COMPOSE_DOCKER_CLI_BUILD := COMPOSE_DOCKER_CLI_BUILD=1
 
+SERVICES_NO_CLI := nginx server matchmaking ai_client frontend_client auth postgres
+
 # Couleurs pour les messages
 GREEN := \033[0;32m
 YELLOW := \033[0;33m
@@ -96,8 +98,8 @@ ifdef SERVICE
 	@echo "$(GREEN)Démarrage du service $(SERVICE) en arrière-plan...$(NC)"
 	$(DOCKER_COMPOSE) up -d $(SERVICE)
 else
-	@echo "$(GREEN)Démarrage de tous les services en arrière-plan...$(NC)"
-	$(DOCKER_COMPOSE) up -d
+	@echo "$(GREEN)Démarrage des services (sans CLI client) en arrière-plan...$(NC)"
+	$(DOCKER_COMPOSE) up -d $(SERVICES_NO_CLI)
 endif
 
 # Démarrer les conteneurs en avant-plan (avec logs)
@@ -107,9 +109,21 @@ ifdef SERVICE
 	@echo "$(GREEN)Démarrage du service $(SERVICE) en avant-plan...$(NC)"
 	$(DOCKER_COMPOSE) up $(SERVICE)
 else
-	@echo "$(GREEN)Démarrage de tous les services en avant-plan...$(NC)"
-	$(DOCKER_COMPOSE) up
+	@echo "$(GREEN)Démarrage des services (sans CLI client) en avant-plan...$(NC)"
+	$(DOCKER_COMPOSE) up $(SERVICES_NO_CLI)
 endif
+
+cli:
+	$(call run_xhost)
+	@echo "$(GREEN)Démarrage du client CLI...$(NC)"
+	@if [ -z "$$(docker compose ps -q cli_client 2>/dev/null)" ]; then \
+		echo "$(YELLOW)Démarrage du conteneur CLI client...$(NC)"; \
+		$(DOCKER_COMPOSE) up -d cli_client; \
+		echo "$(YELLOW)Attente du démarrage complet...$(NC)"; \
+		sleep 2; \
+	fi
+	@echo "$(GREEN)Exécution du programme Python...$(NC)"
+	$(DOCKER_COMPOSE) run --rm cli_client python3 main.py
 
 # Arrêter et supprimer tous les conteneurs
 down:
