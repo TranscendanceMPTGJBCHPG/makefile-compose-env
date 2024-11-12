@@ -89,12 +89,14 @@ services:
     build:
       context: .
       dockerfile: AstroPong/Dockerfile.frontend
-    environment:
-      - API_URL="https://0.0.0.0:8080"
-      - CLIENT_ID=${CLIENT_ID}
-      - REDIRECT_URI=${REDIRECT_URI}
-      - VITE_BACKEND_URL="https://nginx:81"
-      - VITE_WS_URL="ws://nginx:81"
+      args:
+        VITE_API_URL: "http://0.0.0.0:8080"
+        VITE_CLIENT_ID: ${VITE_CLIENT_ID}
+        VITE_REDIRECT_URI: ${VITE_REDIRECT_URI}
+        VITE_BACKEND_URL: "https://nginx:81"
+        VITE_WS_URL: "ws://nginx:81"
+    env_file:
+      - .env
     ports:
       - "5173:5173"
     depends_on:
@@ -132,6 +134,7 @@ services:
     env_file: .env
     volumes:
       - .:/code
+      - ./ssl:/etc/ssl:ro
     depends_on:
       - postgres
     ports:
