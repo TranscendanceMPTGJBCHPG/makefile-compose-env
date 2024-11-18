@@ -9,6 +9,7 @@ SERVICES_NO_CLI := nginx server matchmaking ai_client frontend_client auth postg
 AI_TOKEN := $(shell openssl rand -hex 32)
 CLI_TOKEN := $(shell openssl rand -hex 32)
 GAME_TOKEN := $(shell openssl rand -hex 32)
+UNKNOWN_USER_TOKEN := $(shell openssl rand -hex 32)
 
 # Couleurs pour les messages
 GREEN := \033[0;32m
@@ -50,6 +51,8 @@ setup-env:
 	@echo "AI_SERVICE_TOKEN=Bearer $(AI_TOKEN)" >> .env
 	@echo "CLI_SERVICE_TOKEN=Bearer $(CLI_TOKEN)" >> .env
 	@echo "GAME_SERVICE_TOKEN=Bearer $(GAME_TOKEN)" >> .env
+	@echo "UNKNOWN_USER_SERVICE_TOKEN=Bearer $(UNKNOWN_USER_TOKEN)" >> .env
+	@echo "VITE_UNKNOWN_USER_SERVICE_TOKEN=Bearer $(UNKNOWN_USER_TOKEN)" >> .env
 	@echo "$(GREEN)Service tokens updated in .env$(NC)"
 
 # Aide

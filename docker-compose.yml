@@ -26,6 +26,7 @@ services:
       SSL_CERT_FILE: "/etc/nginx/ssl/nginx.crt"
       SSL_KEY_FILE: "/etc/nginx/ssl/nginx.key"
       GAME_SERVICE_TOKEN: ${GAME_SERVICE_TOKEN}
+      UNKNOWN_USER_TOKEN: ${UNKNOWN_USER_SERVICE_TOKEN}
     volumes:
         - ./ssl:/etc/nginx/ssl:ro
 
@@ -43,6 +44,7 @@ services:
       AI_SERVICE_TOKEN: ${AI_SERVICE_TOKEN}
       CLI_SERVICE_TOKEN: ${CLI_SERVICE_TOKEN}
       GAME_SERVICE_TOKEN: ${GAME_SERVICE_TOKEN}
+      UNKNOWN_USER_TOKEN: ${UNKNOWN_USER_SERVICE_TOKEN}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY}
     networks:
       - transcendence
@@ -104,6 +106,7 @@ services:
       context: .
       dockerfile: AstroPong/Dockerfile.frontend
       args:
+        VITE_UNKNOWN_USER_SERVICE_TOKEN: ${VITE_UNKNOWN_USER_SERVICE_TOKEN}
         VITE_API_URL: "http://0.0.0.0:8080"
         VITE_CLIENT_ID: ${VITE_CLIENT_ID}
         VITE_REDIRECT_URI: ${VITE_REDIRECT_URI}
