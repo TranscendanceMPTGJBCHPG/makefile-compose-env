@@ -6,6 +6,10 @@ COMPOSE_DOCKER_CLI_BUILD := COMPOSE_DOCKER_CLI_BUILD=1
 
 SERVICES_NO_CLI := nginx server matchmaking ai_client frontend_client auth postgres
 
+AI_TOKEN := $(shell openssl rand -hex 32)
+CLI_TOKEN := $(shell openssl rand -hex 32)
+GAME_TOKEN := $(shell openssl rand -hex 32)
+
 # Couleurs pour les messages
 GREEN := \033[0;32m
 YELLOW := \033[0;33m
@@ -37,6 +41,16 @@ setup-ssl:
 		echo "$(RED)Warning: SSL certificates were not created properly$(NC)"; \
 		exit 1; \
 	fi
+
+setup-env:
+	@echo "$(YELLOW)Generating service tokens...$(NC)"
+	@if grep -q "SERVICE_TOKEN" .env 2>/dev/null; then \
+		sed -i '/SERVICE_TOKEN/d' .env; \
+	fi
+	@echo "AI_SERVICE_TOKEN=Bearer $(AI_TOKEN)" >> .env
+	@echo "CLI_SERVICE_TOKEN=Bearer $(CLI_TOKEN)" >> .env
+	@echo "GAME_SERVICE_TOKEN=Bearer $(GAME_TOKEN)" >> .env
+	@echo "$(GREEN)Service tokens updated in .env$(NC)"
 
 # Aide
 help:
@@ -72,7 +86,7 @@ define run_xhost
 endef
 
 # Construire les conteneurs
-build: setup-ssl
+build: setup-ssl setup-env
 ifdef SERVICE
 	@echo "$(GREEN)Construction du service $(SERVICE)...$(NC)"
 	$(DOCKER_COMPOSE) build $(SERVICE)
@@ -82,7 +96,7 @@ else
 endif
 
 # Construire rapidement les conteneurs
-build-fast: setup-ssl
+build-fast: setup-ssl setup-env
 ifdef SERVICE
 	@echo "$(GREEN)Construction rapide du service $(SERVICE)...$(NC)"
 	$(DOCKER_BUILDKIT) $(COMPOSE_DOCKER_CLI_BUILD) $(DOCKER_COMPOSE) build $(SERVICE)
@@ -172,7 +186,7 @@ nginx-reload:
 	$(DOCKER_COMPOSE) exec nginx nginx -s reload
 
 # Reconstruire et redémarrer les conteneurs en arrière-plan
-rebuild: setup-ssl
+rebuild: setup-ssl setup-env
 	$(call run_xhost)
 ifdef SERVICE
 	@echo "$(YELLOW)Reconstruction et redémarrage du service $(SERVICE) en arrière-plan...$(NC)"
@@ -183,7 +197,7 @@ else
 endif
 
 # Reconstruire rapidement et redémarrer les conteneurs en arrière-plan
-rebuild-fast: setup-ssl
+rebuild-fast: setup-ssl setup-env
 	$(call run_xhost)
 ifdef SERVICE
 	@echo "$(YELLOW)Reconstruction rapide et redémarrage du service $(SERVICE) en arrière-plan...$(NC)"
