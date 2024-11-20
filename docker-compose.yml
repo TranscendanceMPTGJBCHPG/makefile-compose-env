@@ -21,10 +21,15 @@ services:
         - transcendence
     ports:
         - "8000:8000"
+    env_file:
+      - .env
     environment:
       AI_WS_URL: "ws://server:8000"
       SSL_CERT_FILE: "/etc/nginx/ssl/nginx.crt"
       SSL_KEY_FILE: "/etc/nginx/ssl/nginx.key"
+      AI_SERVICE_TOKEN: ${AI_SERVICE_TOKEN}
+      GAME_SERVICE_TOKEN: ${GAME_SERVICE_TOKEN}
+      UNKNOWN_USER_SERVICE_TOKEN: ${UNKNOWN_USER_SERVICE_TOKEN}
     volumes:
         - ./ssl:/etc/nginx/ssl:ro
 
@@ -33,10 +38,17 @@ services:
     build:
       context: .
       dockerfile: matchmaking/Dockerfile.matchmaking
+    env_file:
+      - .env
     environment:
       DJANGO_ALLOWED_HOSTS: "localhost 127.0.0.1 matchmaking nginx 192.168.0.0/16 10.0.0.0/8"
       SSL_CERT_FILE: "/etc/nginx/ssl/nginx.crt"
       SSL_KEY_FILE: "/etc/nginx/ssl/nginx.key"
+      AI_SERVICE_TOKEN: ${AI_SERVICE_TOKEN}
+      CLI_SERVICE_TOKEN: ${CLI_SERVICE_TOKEN}
+      GAME_SERVICE_TOKEN: ${GAME_SERVICE_TOKEN}
+      UNKNOWN_USER_TOKEN: ${UNKNOWN_USER_SERVICE_TOKEN}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
     networks:
       - transcendence
     ports:
@@ -51,6 +63,10 @@ services:
     build:
       context: .
       dockerfile: PongAI/Dockerfile.ai
+    env_file:
+      - .env
+    environment:
+      AI_SERVICE_TOKEN: ${AI_SERVICE_TOKEN}
     depends_on:
       - nginx
       - server
@@ -70,7 +86,10 @@ services:
     depends_on:
       - server
       - nginx
+    env_file:
+      - .env
     environment:
+      CLI_SERVICE_TOKEN: ${CLI_SERVICE_TOKEN}
       AI_WS_URL: "ws://server:8000"
       DISPLAY: ${DISPLAY} # Utilise la variable d'environnement DISPLAY de l'hôte
       SDL_AUDIODRIVER: "dummy" # Désactive le son pour éviter les erreurs de son
@@ -90,6 +109,7 @@ services:
       context: .
       dockerfile: AstroPong/Dockerfile.frontend
       args:
+        VITE_UNKNOWN_USER_SERVICE_TOKEN: ${VITE_UNKNOWN_USER_SERVICE_TOKEN}
         VITE_API_URL: "http://0.0.0.0:8080"
         VITE_CLIENT_ID: ${VITE_CLIENT_ID}
         VITE_REDIRECT_URI: ${VITE_REDIRECT_URI}
