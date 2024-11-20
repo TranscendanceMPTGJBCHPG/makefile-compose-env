@@ -21,12 +21,15 @@ services:
         - transcendence
     ports:
         - "8000:8000"
+    env_file:
+      - .env
     environment:
       AI_WS_URL: "ws://server:8000"
       SSL_CERT_FILE: "/etc/nginx/ssl/nginx.crt"
       SSL_KEY_FILE: "/etc/nginx/ssl/nginx.key"
+      AI_SERVICE_TOKEN: ${AI_SERVICE_TOKEN}
       GAME_SERVICE_TOKEN: ${GAME_SERVICE_TOKEN}
-      UNKNOWN_USER_TOKEN: ${UNKNOWN_USER_SERVICE_TOKEN}
+      UNKNOWN_USER_SERVICE_TOKEN: ${UNKNOWN_USER_SERVICE_TOKEN}
     volumes:
         - ./ssl:/etc/nginx/ssl:ro
 
