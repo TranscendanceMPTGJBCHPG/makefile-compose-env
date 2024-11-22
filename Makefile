@@ -88,25 +88,51 @@ define run_xhost
 	fi
 endef
 
-# Construire les conteneurs
-build: setup-ssl setup-env
-ifdef SERVICE
+build-single-service:
 	@echo "$(GREEN)Construction du service $(SERVICE)...$(NC)"
 	$(DOCKER_COMPOSE) build $(SERVICE)
+
+build-fast-single-service:
+	@echo "$(GREEN)Construction rapide du service $(SERVICE)...$(NC)"
+	$(DOCKER_BUILDKIT) $(COMPOSE_DOCKER_CLI_BUILD) $(DOCKER_COMPOSE) build $(SERVICE)
+
+build: setup-ssl
+ifdef SERVICE
+	@$(MAKE) build-single-service
 else
+	@$(MAKE) setup-env
 	@echo "$(GREEN)Construction de tous les services...$(NC)"
 	$(DOCKER_COMPOSE) build
 endif
 
-# Construire rapidement les conteneurs
-build-fast: setup-ssl setup-env
+build-fast: setup-ssl
 ifdef SERVICE
-	@echo "$(GREEN)Construction rapide du service $(SERVICE)...$(NC)"
-	$(DOCKER_BUILDKIT) $(COMPOSE_DOCKER_CLI_BUILD) $(DOCKER_COMPOSE) build $(SERVICE)
+	@$(MAKE) build-fast-single-service
 else
+	@$(MAKE) setup-env
 	@echo "$(GREEN)Construction rapide de tous les services...$(NC)"
 	$(DOCKER_BUILDKIT) $(COMPOSE_DOCKER_CLI_BUILD) $(DOCKER_COMPOSE) build
 endif
+
+# Construire les conteneurs
+# build: setup-ssl setup-env
+# ifdef SERVICE
+# 	@echo "$(GREEN)Construction du service $(SERVICE)...$(NC)"
+# 	$(DOCKER_COMPOSE) build $(SERVICE)
+# else
+# 	@echo "$(GREEN)Construction de tous les services...$(NC)"
+# 	$(DOCKER_COMPOSE) build
+# endif
+
+# # Construire rapidement les conteneurs
+# build-fast: setup-ssl setup-env
+# ifdef SERVICE
+# 	@echo "$(GREEN)Construction rapide du service $(SERVICE)...$(NC)"
+# 	$(DOCKER_BUILDKIT) $(COMPOSE_DOCKER_CLI_BUILD) $(DOCKER_COMPOSE) build $(SERVICE)
+# else
+# 	@echo "$(GREEN)Construction rapide de tous les services...$(NC)"
+# 	$(DOCKER_BUILDKIT) $(COMPOSE_DOCKER_CLI_BUILD) $(DOCKER_COMPOSE) build
+# endif
 
 # Démarrer les conteneurs en arrière-plan
 up:
