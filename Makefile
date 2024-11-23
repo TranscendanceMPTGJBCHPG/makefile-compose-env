@@ -114,26 +114,6 @@ else
 	$(DOCKER_BUILDKIT) $(COMPOSE_DOCKER_CLI_BUILD) $(DOCKER_COMPOSE) build
 endif
 
-# Construire les conteneurs
-# build: setup-ssl setup-env
-# ifdef SERVICE
-# 	@echo "$(GREEN)Construction du service $(SERVICE)...$(NC)"
-# 	$(DOCKER_COMPOSE) build $(SERVICE)
-# else
-# 	@echo "$(GREEN)Construction de tous les services...$(NC)"
-# 	$(DOCKER_COMPOSE) build
-# endif
-
-# # Construire rapidement les conteneurs
-# build-fast: setup-ssl setup-env
-# ifdef SERVICE
-# 	@echo "$(GREEN)Construction rapide du service $(SERVICE)...$(NC)"
-# 	$(DOCKER_BUILDKIT) $(COMPOSE_DOCKER_CLI_BUILD) $(DOCKER_COMPOSE) build $(SERVICE)
-# else
-# 	@echo "$(GREEN)Construction rapide de tous les services...$(NC)"
-# 	$(DOCKER_BUILDKIT) $(COMPOSE_DOCKER_CLI_BUILD) $(DOCKER_COMPOSE) build
-# endif
-
 # Démarrer les conteneurs en arrière-plan
 up:
 	$(call run_xhost)
@@ -208,6 +188,20 @@ ps:
 clean:
 	@echo "$(RED)Nettoyage des ressources Docker non utilisées...$(NC)"
 	docker system prune -af --volumes
+	@echo "$(RED)Suppression du dossier SSL...$(NC)"
+	@if [ -d "ssl" ]; then \
+		rm -rf ssl; \
+		echo "$(GREEN)Dossier SSL supprimé$(NC)"; \
+	fi
+	@echo "$(RED)Suppression des tokens de service du fichier .env...$(NC)"
+	@if [ -f ".env" ]; then \
+		sed -i '/AI_SERVICE_TOKEN/d' .env; \
+		sed -i '/CLI_SERVICE_TOKEN/d' .env; \
+		sed -i '/GAME_SERVICE_TOKEN/d' .env; \
+		sed -i '/UNKNOWN_USER_SERVICE_TOKEN/d' .env; \
+		sed -i '/VITE_UNKNOWN_USER_SERVICE_TOKEN/d' .env; \
+		echo "$(GREEN)Tokens de service supprimés du fichier .env$(NC)"; \
+	fi
 
 # Recharger la configuration de Nginx
 nginx-reload:
