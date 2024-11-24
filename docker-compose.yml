@@ -67,6 +67,7 @@ services:
       - .env
     environment:
       AI_SERVICE_TOKEN: ${AI_SERVICE_TOKEN}
+      AI_HASH_SECRET: ${AI_HASH_SECRET}
     depends_on:
       - nginx
       - server
@@ -74,7 +75,7 @@ services:
     networks:
         - transcendence
     volumes:
-        - ./PongAI/ai_data:/app/ai_data  # Nouveau volume pour sauvegarder les données AI
+        - ./PongAI/ai_data:/app/ai_data
         - ./ssl:/etc/nginx/ssl:ro
   
   cli_client:
