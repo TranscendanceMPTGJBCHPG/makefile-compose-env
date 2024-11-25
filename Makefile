@@ -13,11 +13,7 @@ UNKNOWN_USER_TOKEN := $(shell openssl rand -hex 32)
 
 AI_HASH_TOKEN := $(shell openssl rand -hex 32)
 
-IP_ADDRESS := $(shell \
-	(curl -s -m 5 https://api.ipify.org) || \
-	(curl -s -m 5 https://ifconfig.me) || \
-	(curl -s -m 5 https://icanhazip.com) || \
-	(curl -s -m 5 https://ipecho.net/plain))
+IP_ADDRESS := $(shell ip addr | awk '/inet / {if(++n==2)print $$2}' | cut -d/ -f1)
 
 # Couleurs pour les messages
 GREEN := \033[0;32m
@@ -87,9 +83,9 @@ setup-env:
 	@echo "GAME_SERVICE_TOKEN=Bearer $(GAME_TOKEN)" >> .env
 	@echo "UNKNOWN_USER_SERVICE_TOKEN=Bearer $(UNKNOWN_USER_TOKEN)" >> .env
 	@echo "VITE_UNKNOWN_USER_SERVICE_TOKEN=Bearer $(UNKNOWN_USER_TOKEN)" >> .env
-	@echo "VITE_REDIRECT_URI=https://$(IP_ADDRESS):5173/" >> .env
+	@echo "VITE_REDIRECT_URI=https://$(IP_ADDRESS):7777/auth/authfortytwo" >> .env
 	@echo "$(GREEN)Service tokens and redirect URI updated in .env$(NC)"
-	@echo "$(YELLOW)You can access your service at: https://$(IP_ADDRESS):5173/$(NC)"
+	@echo "$(YELLOW)You can access your service at: https://$(IP_ADDRESS):5173$(NC)"
 	@echo "$(YELLOW) Verifying AI QTables hash..."
 	@if ! grep -q "AI_HASH_SECRET" .env; then \
 		echo "$(YELLOW)Generating AI hash secret...$(NC)"; \
