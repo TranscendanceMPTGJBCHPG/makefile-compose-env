@@ -73,16 +73,12 @@ setup-env:
 		sed -i '/^AI_SERVICE_TOKEN/d' .env; \
 		sed -i '/^CLI_SERVICE_TOKEN/d' .env; \
 		sed -i '/^GAME_SERVICE_TOKEN/d' .env; \
-		sed -i '/^UNKNOWN_USER_SERVICE_TOKEN/d' .env; \
-		sed -i '/^VITE_UNKNOWN_USER_SERVICE_TOKEN/d' .env; \
 		sed -i '/^VITE_REDIRECT_URI/d' .env; \
 	fi
 	@echo "$(YELLOW)Adding new tokens and redirect URI...$(NC)"
 	@echo "AI_SERVICE_TOKEN=Bearer $(AI_TOKEN)" >> .env
 	@echo "CLI_SERVICE_TOKEN=Bearer $(CLI_TOKEN)" >> .env
 	@echo "GAME_SERVICE_TOKEN=Bearer $(GAME_TOKEN)" >> .env
-	@echo "UNKNOWN_USER_SERVICE_TOKEN=Bearer $(UNKNOWN_USER_TOKEN)" >> .env
-	@echo "VITE_UNKNOWN_USER_SERVICE_TOKEN=Bearer $(UNKNOWN_USER_TOKEN)" >> .env
 	@echo "VITE_REDIRECT_URI=https://$(IP_ADDRESS):7777/auth/authfortytwo" >> .env
 	@echo "$(GREEN)Service tokens and redirect URI updated in .env$(NC)"
 	@echo "$(YELLOW)You can access your service at: https://$(IP_ADDRESS):5173$(NC)"
@@ -241,8 +237,6 @@ clean:
 		sed -i '/AI_SERVICE_TOKEN/d' .env; \
 		sed -i '/CLI_SERVICE_TOKEN/d' .env; \
 		sed -i '/GAME_SERVICE_TOKEN/d' .env; \
-		sed -i '/UNKNOWN_USER_SERVICE_TOKEN/d' .env; \
-		sed -i '/VITE_UNKNOWN_USER_SERVICE_TOKEN/d' .env; \
 		echo "$(GREEN)Tokens de service supprimés du fichier .env$(NC)"; \
 	fi
 
