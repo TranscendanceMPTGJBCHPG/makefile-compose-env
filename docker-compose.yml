@@ -1,26 +1,12 @@
 services:
-  nginx:
-    image: nginx:latest
-    ports:
-      - "7777:7777"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./ssl:/etc/nginx/ssl:ro
-    depends_on:
-      - server
-      - frontend_client
-    networks:
-      - transcendence
-
-
   server:
     build:
       context: .
       dockerfile: GameServer/Dockerfile.server
     networks:
-        - transcendence
+      - transcendence
     ports:
-        - "8000:8000"
+      - "8000:8000"
     env_file:
       - .env
     environment:
@@ -30,8 +16,7 @@ services:
       AI_SERVICE_TOKEN: ${AI_SERVICE_TOKEN}
       GAME_SERVICE_TOKEN: ${GAME_SERVICE_TOKEN}
     volumes:
-        - ./ssl:/etc/nginx/ssl:ro
-
+      - ./ssl:/etc/nginx/ssl:ro
 
   matchmaking:
     build:
@@ -55,49 +40,8 @@ services:
       - ./matchmaking:/app
       - ./ssl:/etc/nginx/ssl:ro
     working_dir: /app/matchmaking_service
-
-
-  ai_client:
-    build:
-      context: .
-      dockerfile: PongAI/Dockerfile.ai
-    env_file:
-      - .env
-    environment:
-      AI_SERVICE_TOKEN: ${AI_SERVICE_TOKEN}
-      AI_HASH_SECRET: ${AI_HASH_SECRET}
-    depends_on:
-      - nginx
-      - server
-      - frontend_client
-    networks:
-        - transcendence
-    volumes:
-        - ./PongAI/ai_data:/app/ai_data
-        - ./ssl:/etc/nginx/ssl:ro
-
-
-  frontend_client:
-    build:
-      context: .
-      dockerfile: AstroPong/Dockerfile.frontend
-      args:
-        VITE_API_URL: "http://0.0.0.0:8080"
-        VITE_CLIENT_ID: ${VITE_CLIENT_ID}
-        VITE_REDIRECT_URI: ${VITE_REDIRECT_URI}
-        VITE_BACKEND_URL: "https://nginx:81"
-        VITE_WS_URL: "ws://nginx:81"
-    env_file:
-      - .env
-    ports:
-      - "5173:5173"
     depends_on:
       - server
-    networks:
-        - transcendence
-    volumes:
-      - ./ssl:/etc/nginx/ssl:ro
-
 
   postgres:
     container_name: postgres
@@ -116,7 +60,14 @@ services:
     restart: unless-stopped
     networks:
       - transcendence
-
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      - server
+      - matchmaking
 
   auth:
     container_name: auth
@@ -127,14 +78,76 @@ services:
     volumes:
       - .:/code
       - ./ssl:/etc/ssl:ro
-    depends_on:
-      - postgres
     ports:
       - "8080:8080"
     restart: on-failure
     networks:
       - transcendence
+    healthcheck:
+      test: ["CMD", "curl", "-f", "-k", "https://0.0.0.0:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    depends_on:
+      postgres:
+        condition: service_healthy
 
+  nginx:
+    image: nginx:latest
+    ports:
+      - "7777:7777"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/nginx/ssl:ro
+    networks:
+      - transcendence
+    depends_on:
+      auth:
+        condition: service_healthy
+    restart: always
+
+  ai_client:
+    build:
+      context: .
+      dockerfile: PongAI/Dockerfile.ai
+    env_file:
+      - .env
+    environment:
+      AI_SERVICE_TOKEN: ${AI_SERVICE_TOKEN}
+      AI_HASH_SECRET: ${AI_HASH_SECRET}
+    depends_on:
+      nginx:
+        condition: service_started
+    networks:
+      - transcendence
+    volumes:
+      - ./PongAI/ai_data:/app/ai_data
+      - ./ssl:/etc/nginx/ssl:ro
+
+  frontend_client:
+    build:
+      context: .
+      dockerfile: AstroPong/Dockerfile.frontend
+      args:
+        VITE_API_URL: "http://0.0.0.0:8080"
+        VITE_CLIENT_ID: ${VITE_CLIENT_ID}
+        VITE_REDIRECT_URI: ${VITE_REDIRECT_URI}
+        VITE_BACKEND_URL: "https://nginx:81"
+        VITE_WS_URL: "ws://nginx:81"
+    env_file:
+      - .env
+    ports:
+      - "5173:5173"
+    networks:
+      - transcendence
+    volumes:
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      nginx:
+        condition: service_started
+      auth:
+        condition: service_healthy
 
 volumes:
   pgdata:
